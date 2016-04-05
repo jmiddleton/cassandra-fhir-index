@@ -8,13 +8,15 @@ The index operates on tables where FHIR Resources are stored as JSON content. At
 
 Indexed data is stored locally to the node where the actual Cassandra data is stored. The documents in Lucene is tightly coupled with the live data; any create, update or deletion operation is atomically propagated to Lucene. This architecture presents the following benefits:
 
-- No single point of failure for searches
-- Linear scalability
-- Automatic indexing of data added to Cassandra
-- Automatic data replication
-- Search support for CQL using expr syntax
-- Reindexing of Cassandra tables using CQL
-- Full-text search
+-  No single point of failure for searches
+-  Linear scalability
+-  Automatic indexing of data added to Cassandra
+-  Automatic data replication
+-  Search support for CQL using expr syntax
+-  Reindexing of Cassandra tables using CQL
+-  Full-text search
+-  Data locality
+-  Transparent integration with Apache Spark
 
 ## Motivation
 
@@ -42,11 +44,20 @@ Cassandra FHIR Index provides the following search options:
 -  Top-k queries (relevance scoring, sort by value)
 -  Spark and Hadoop compatibility
 -  Paging over filters
+-  Token Range support
 
 ## Architecture
 
-When a index is created using [CREATE CUSTOM INDEX](https://cassandra.apache.org/doc/cql3/CQL.html#createIndexStmt) statement, Cassandra will invoke the class's constructor defined with the `USING` option. At that moment, the Lucene components will be initialized and configured based on the index metadata. The implementation must implement few methods but the two more important are read (`Searcher`) and write (`Indexer`) operations. These implementations are the responsibles to interact with Lucene to search and store `Document`.
+The high level architecture consists of Cassandra nodes each of them with a local Lucene index. When a table is updated, the Lucene document is automatically updated. This uses data locality so each node will indexes the data that is stored locally. The update and indexing is done atomically so there is a performance impact when writing. 
 
+On searching, the implementation requires few extra steps. When a user executes a `CQL SELECT` statement, the request is first processed by a random coordinator. Then, the coordinator sends the query to each node in the cluster. Each node searches locally in the Lucene index and returns its results. Once all the results are back in the coordinator, it merge the results and returns only the top n matches.
+
+When a index is created using [CREATE CUSTOM INDEX](https://cassandra.apache.org/doc/cql3/CQL.html#createIndexStmt) statement, Cassandra instanciates the class defined by the `USING` option. At this time, the Lucene components will be configured based on the index metadata and the index will be created in the Cassandra node. Along with the Index, there are two important interfaces to implement: 
+
+- `Searcher`: performs queries on the Lucene index based on the CQL condition. 
+- `Indexer`: event listener which processes events emitted during partition updates (create or delete). This implementation upserts Lucene documents in the local index.
+
+Each Lucene document is composed of multiple key-value pairs where each key represent a FHIR Resource parameter. Along with that, the document also stores the partition-key of the real data, the partitioner's token, the clustering columns and the resource type.
 
 ### Index Options
 
@@ -54,7 +65,7 @@ The index supports the following options:
 
 Option | Description | Default
 --- | --- | ---
-refresh_seconds |  | 60 seconds |
+refresh_seconds | Amount of seconds to wait until the next index refresh. | 60 seconds |
 ram_buffer_mb |  | 64 MB |
 max_merge_mb |  | 5 MB |
 max_cached_mb |  | 30 MB |
@@ -63,9 +74,29 @@ indexing_queues_size |  | 50 seconds |
 excluded_data_centers |  | *empty* |
 token_range_cache_size |  | 16 |
 search_cache_size |  | 16 |
-directory_path |  | lucene |
-resource_type_column |  | *optional* |
+directory_path | Relative path of the directory where Lucene indexes will be stored. This path is relative to $CASSANDRA/data folder | lucene |
+resource_type_column | Column name of the column that stores the FHIR Resource Type. This is used when you only want to index a specific resource, i.e.: Observation | *optional* |
 
+#### Search Option
+Defines which FHIR Resources to index. The format is as follows:
+
+```
+resources : {
+   [FHIR Resource Type] : ["parameter1", "parameter2", "parameter3", "parameter4"]
+}
+
+Example:
+
+resources : {
+    Patient : ["name", "identifier", "family", "email", "active"],
+    Observation : ["code", "value-quantity", "performer", "subject", "status", "category"],
+    AllergyIntolerance : ["date", "patient", "status", "type"],
+}
+```
+
+If `resources` is not defined, the index will index all the resources found by the HAPI-FHIR library.
+
+During initialization the index will validate if the configuration is correct or not. In case of errors, the creation of the index will fail and an error message will be displayed.
 
 ## Quick start
 
@@ -84,7 +115,7 @@ cqlsh> USE test;
 Firstly, creates the table where you are going to store FHIR resources. Remember that one column will contain the JSON.
 
 ```
-cqlsh:test> CREATE TABLE test.FHIR_RESOURCES (
+cqlsh:test> CREATE TABLE FHIR_RESOURCES (
     resource_id text,
     version int,
     resource_type text,
@@ -102,7 +133,7 @@ cqlsh:test> CREATE TABLE test.FHIR_RESOURCES (
 Then create an index using CQL as follows:
 
 ```
-cqlsh:test> CREATE CUSTOM INDEX idx_patient_name ON test.FHIR_RESOURCES (content)
+cqlsh:test> CREATE CUSTOM INDEX idx_fhir_resources ON FHIR_RESOURCES (content)
      USING 'io.puntanegra.fhir.index.FhirIndex'
      WITH OPTIONS = {
         'refresh_seconds' : '5',
@@ -115,6 +146,15 @@ cqlsh:test> CREATE CUSTOM INDEX idx_patient_name ON test.FHIR_RESOURCES (content
      };
 ```
 
+### Inserting Test Data
+
+Now that the index is created, we can insert some test data. To load test data into Cassandra execute the following command.
+
+```
+
+//TODO: create a class to load data in Cassandra
+
+```
 
 
 ## Build and Installation
