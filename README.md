@@ -100,6 +100,18 @@ During initialization the index will validate if the configuration is correct or
 
 ## Quick start
 
+The example uses a Docker container with a preconfigured Cassandra to support this index implementation. To start a single instance execute:
+
+```
+$ docker run --name cassandra-node01 -d jmiddleton/cassandra-fhir
+```
+
+To connect to Cassandra from `cqlsh`, start another container as follows:
+
+```
+$ docker run -it --link cassandra-node01:cassandra --rm jmiddleton/cassandra-fhir cqlsh cassandra
+```
+
 The example walks through creating a table and index for a JSON column. Then shows how to performs queries on some inserted data.
 
 The example assumes the `test` keyspace has been created and is in use.
@@ -112,7 +124,7 @@ cqlsh> CREATE KEYSPACE test WITH replication = {
 cqlsh> USE test;
 ```
 
-Firstly, creates the table where you are going to store FHIR resources. Remember that one column will contain the JSON.
+Firstly, create the table where you are going to store FHIR resources. Remember that one column will contain JSON content.
 
 ```
 cqlsh:test> CREATE TABLE FHIR_RESOURCES (
