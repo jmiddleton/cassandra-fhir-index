@@ -45,9 +45,26 @@ Cassandra FHIR Index provides the following search options:
 
 ## Architecture
 
-When a index is created using `CREATE CUSTOM INDEX` statement, Cassandra will invoke the class's constructor defined with the `USING` option. At that moment, the Lucene components will be initialized and configured based on the index metadata. The implementation must implement few methods but the two more important are read (`Searcher`) and write (`Indexer`) operations. These implementations are the responsibles to interact with Lucene to search and store `Document`.
+When a index is created using [CREATE CUSTOM INDEX](https://cassandra.apache.org/doc/cql3/CQL.html#createIndexStmt) statement, Cassandra will invoke the class's constructor defined with the `USING` option. At that moment, the Lucene components will be initialized and configured based on the index metadata. The implementation must implement few methods but the two more important are read (`Searcher`) and write (`Indexer`) operations. These implementations are the responsibles to interact with Lucene to search and store `Document`.
 
 
+### Index Options
+
+The index supports the following options:
+
+Option | Description | Default
+--- | --- | ---
+refresh_seconds |  | 60 seconds |
+ram_buffer_mb |  | 64 MB |
+max_merge_mb |  | 5 MB |
+max_cached_mb |  | 30 MB |
+indexing_threads |  | 0 |
+indexing_queues_size |  | 50 seconds |
+excluded_data_centers |  | *empty* |
+token_range_cache_size |  | 16 |
+search_cache_size |  | 16 |
+directory_path |  | lucene |
+resource_type_column |  | *optional* |
 
 
 ## Quick start
@@ -64,7 +81,7 @@ cqlsh> CREATE KEYSPACE test WITH replication = {
 cqlsh> USE test;
 ```
 
-Create a `FHIR_RESOURCES` table:
+Firstly, creates the table where you are going to store FHIR resources. Remember that one column will contain the JSON.
 
 ```
 cqlsh:test> CREATE TABLE test.FHIR_RESOURCES (
@@ -82,7 +99,7 @@ cqlsh:test> CREATE TABLE test.FHIR_RESOURCES (
 
 ### Creating an Index
 
-To create indexes use CQL as follows:
+Then create an index using CQL as follows:
 
 ```
 cqlsh:test> CREATE CUSTOM INDEX idx_patient_name ON test.FHIR_RESOURCES (content)
@@ -90,7 +107,10 @@ cqlsh:test> CREATE CUSTOM INDEX idx_patient_name ON test.FHIR_RESOURCES (content
      WITH OPTIONS = {
         'refresh_seconds' : '5',
         'search': '{
-            parameters: ["gender", "name"]
+            resources : {
+			   Patient : ["name", "identifier", "family", "email", "active"],
+			   Observation : ["code", "value-quantity"]
+			}
         }'
      };
 ```
