@@ -45,7 +45,7 @@ Cassandra FHIR Index provides the following search options:
 
 ## Architecture
 
-When a index is created using `CREATE CUSTOM INDEX`, Cassandra will invoke the class's constructor defined with the `USING` option. At that moment, the Lucene components will be initialized and configured based on the index metadata. The implementation must implement few methods but the two more important are read (`Searcher`) and write (`Indexer`) operations. These implementations are the responsibles to interact with Lucene to search and store `Document`.
+When a index is created using `CREATE CUSTOM INDEX` statement, Cassandra will invoke the class's constructor defined with the `USING` option. At that moment, the Lucene components will be initialized and configured based on the index metadata. The implementation must implement few methods but the two more important are read (`Searcher`) and write (`Indexer`) operations. These implementations are the responsibles to interact with Lucene to search and store `Document`.
 
 
 
@@ -63,6 +63,38 @@ cqlsh> CREATE KEYSPACE test WITH replication = {
    ... };
 cqlsh> USE test;
 ```
+
+Create a `FHIR_RESOURCES` table:
+
+```
+cqlsh:test> CREATE TABLE test.FHIR_RESOURCES (
+    resource_id text,
+    version int,
+    resource_type text,
+    state text,
+    lastupdated timestamp,
+    format text,
+    author text,
+    content text,
+    PRIMARY KEY (resource_id, version, lastupdated)
+);
+```
+
+### Creating an Index
+
+To create indexes use CQL as follows:
+
+```
+cqlsh:test> CREATE CUSTOM INDEX idx_patient_name ON test.FHIR_RESOURCES (content)
+     USING 'io.puntanegra.fhir.index.FhirIndex'
+     WITH OPTIONS = {
+        'refresh_seconds' : '5',
+        'search': '{
+            parameters: ["gender", "name"]
+        }'
+     };
+```
+
 
 
 ## Build and Installation
