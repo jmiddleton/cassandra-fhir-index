@@ -65,17 +65,15 @@ The index supports the following options:
 
 Option | Description | Default
 --- | --- | ---
-refresh_seconds | Amount of seconds to wait until the next index refresh. | 60 seconds |
-ram_buffer_mb |  | 64 MB |
-max_merge_mb |  | 5 MB |
-max_cached_mb |  | 30 MB |
-indexing_threads |  | 0 |
-indexing_queues_size |  | 50 seconds |
-excluded_data_centers |  | *empty* |
-token_range_cache_size |  | 16 |
-search_cache_size |  | 16 |
+refresh_seconds | Amount of seconds to wait until the next index refresh | 60 |
+ram_buffer_mb | The size of the buffer used by `NRTCachingDirectory` | 64 MB |
+max_merge_mb | Max merged segment size | 5 MB |
+max_cached_mb | Max segment cache size | 30 MB |
+indexing_threads | Number of indexing threads. Cero means synchronous indexing | 0 |
+indexing_queues_size | Max number of queued documents per asynchronous indexing thread | 50 |
+search_cache_size | Max number of searches to be cached | 16 |
 directory_path | Relative path of the directory where Lucene indexes will be stored. This path is relative to $CASSANDRA/data folder | lucene |
-resource_type_column | Column name of the column that stores the FHIR Resource Type. This is used when you only want to index a specific resource, i.e.: Observation | *optional* |
+resource_type_column | Column name of the column that stores the FHIR Resource Type. This is used when you only want to index a specific resource, i.e.: Observation or Patient | *optional* |
 
 #### Search Option
 Defines which FHIR Resources to index. The format is as follows:
@@ -84,9 +82,11 @@ Defines which FHIR Resources to index. The format is as follows:
 resources : {
    [FHIR Resource Type] : ["parameter1", "parameter2", "parameter3", "parameter4"]
 }
+```
 
 Example:
 
+```
 resources : {
     Patient : ["name", "identifier", "family", "email", "active"],
     Observation : ["code", "value-quantity", "performer", "subject", "status", "category"],
@@ -100,16 +100,18 @@ During initialization the index will validate if the configuration is correct or
 
 ## Quick start
 
-The example uses a Docker container with a preconfigured Cassandra to support this index implementation. To start a single instance execute:
+The example uses a Docker container with a preconfigured Cassandra to support this implementation. Make sure you execute the following commands in Docker (i.e. Docker Quickstart Terminal).
+
+To start a single Cassandra node execute:
 
 ```
-$ docker run --name cassandra-node01 -d jmiddleton/cassandra-fhir
+$ docker run -p 9042:9042 --name cassandra-node01 -d jmiddleton/cassandra_fhir:3.0.4
 ```
 
 To connect to Cassandra from `cqlsh`, start another container as follows:
 
 ```
-$ docker run -it --link cassandra-node01:cassandra --rm jmiddleton/cassandra-fhir cqlsh cassandra
+$ docker run -it --link cassandra-node01:cassandra --rm jmiddleton/cassandra_fhir:3.0.4 cqlsh cassandra
 ```
 
 The example walks through creating a table and index for a JSON column. Then shows how to performs queries on some inserted data.
@@ -118,13 +120,13 @@ The example assumes the `test` keyspace has been created and is in use.
 
 ```
 cqlsh> CREATE KEYSPACE test WITH replication = {
-   ... 'class': 'SimpleStrategy',
-   ... 'replication_factor': '1'
-   ... };
+          'class': 'SimpleStrategy',
+          'replication_factor': '1'
+       };
 cqlsh> USE test;
 ```
 
-Firstly, create the table where you are going to store FHIR resources. Remember that one column will contain JSON content.
+Create the table where you are going to store FHIR resources. Remember that one column will contain JSON content.
 
 ```
 cqlsh:test> CREATE TABLE FHIR_RESOURCES (
@@ -138,11 +140,13 @@ cqlsh:test> CREATE TABLE FHIR_RESOURCES (
     content text,
     PRIMARY KEY (resource_id, version, lastupdated)
 );
+
+cqlsh:test> SELECT * FROM test.FHIR_RESOURCES;
 ```
 
 ### Creating an Index
 
-Then create an index using CQL as follows:
+We create the index as follows:
 
 ```
 cqlsh:test> CREATE CUSTOM INDEX idx_fhir_resources ON FHIR_RESOURCES (content)
@@ -151,31 +155,70 @@ cqlsh:test> CREATE CUSTOM INDEX idx_fhir_resources ON FHIR_RESOURCES (content)
         'refresh_seconds' : '5',
         'search': '{
             resources : {
-			   Patient : ["name", "identifier", "family", "email", "active"],
-			   Observation : ["code", "value-quantity"]
-			}
+               Patient : ["name", "identifier", "family", "email", "active"],
+               Observation : ["code", "value-quantity"]
+            }
         }'
      };
 ```
 
 ### Inserting Test Data
 
-Now that the index is created, we can insert some test data. To load test data into Cassandra execute the following command.
+Now that the index has been created we can insert some test data. 
+To load test data into Cassandra, first download the folder `test-data` and then execute the following commands:
 
 ```
+cd test-data
 
-//TODO: create a class to load data in Cassandra
-
+mvn -Dtest=io.puntanegra.fhir.index.FhirTestDataTest#loadTestData -DCassandraNode=localhost test
 ```
 
+This test will generate 100 random Observation and Patient. The output will show you values you can use to test your queries.
+
+### Querying Data
+
+To query the table, we just need to use the following `SELECT` statement. 
+
+```
+cqlsh> SELECT * FROM test.FHIR_RESOURCES WHERE expr(idx_fhir_resources, 'resource_type:Observation AND code:27113001');
+
+cqlsh> SELECT * FROM test.FHIR_RESOURCES WHERE expr(idx_fhir_resources, 'resource_type:Patient AND family:Au*');
+```
+
+The important element here is `expr()`. This element allows us to specify the index and the query expression for that index. The index will process the expression and find all the records that match the expression. Based on that result, Cassandra will extract the rows from the table defined in the `SELECT` statement.
+
+
+For information about the different expression types, please refer to [Lucene's Query Parser Syntax](https://lucene.apache.org/core/5_2_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package_description). 
+
+TODO: describe custom keywords for ORDER BY and so on.
+
+TODO: describe different FHIR search parameter types: Number, Date, Reference, Token, etc.
 
 ## Build and Installation
 
-To build and install, first you will need the following tools:
+To build and install, first you need the following tools:
 
 -  Cassandra 3.0.4 or above
 -  Java >= 1.8
 -  Maven >= 3.0
 
 
+```
+mvn clean package
+```
+
+### Create Docker image
+
+To create a Docker image execute the following commands:
+
+```
+docker build --build-arg VERSION=0.0.1 -t jmiddleton/cassandra_fhir:3.0.4 .
+```
 TODO....
+
+
+
+
+
+
+
