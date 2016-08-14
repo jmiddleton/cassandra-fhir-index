@@ -44,6 +44,7 @@ public class SearchParamExtractorTest {
 		Set<String> parameters = new HashSet<String>();
 		parameters.add("code");
 		parameters.add("value-quantity");
+		parameters.add("date");
 
 		Set<AbstractSearchParam> values = helper.extractParametersValues(resource, parameters);
 
@@ -57,7 +58,14 @@ public class SearchParamExtractorTest {
 			if (SearchParamTypes.TOKEN == type) {
 				SearchParamToken token = (SearchParamToken) entry;
 				if (ename.equals("code") && "http://loinc.org".equals(token.getSystem())) {
-					assertEquals("3141-9", token.getCode());
+					assertEquals("12345-5", token.getCode());
+				}
+			}if (SearchParamTypes.DATE == type) {
+				SearchParamDates dates = (SearchParamDates) entry;
+				if (ename.equals("date")) {
+					Calendar date= Calendar.getInstance();
+					date.setTime(dates.getValue());
+					assertEquals(4, date.get(Calendar.MONTH));
 				}
 			}
 		}

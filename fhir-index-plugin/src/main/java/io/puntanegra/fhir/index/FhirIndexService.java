@@ -51,6 +51,7 @@ import org.apache.cassandra.io.sstable.SSTable;
 import org.apache.cassandra.schema.IndexMetadata;
 import org.apache.cassandra.utils.concurrent.OpOrder;
 import org.apache.cassandra.utils.concurrent.OpOrder.Group;
+import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -455,7 +456,10 @@ public class FhirIndexService {
 	 */
 	private Query query(String expression, ReadCommand command) {
 		try {
-			Query searchQuery = new QueryParser("family", this.indexOptions.search.defaultAnalyzer).parse(expression);
+			QueryParser queryParser = new QueryParser("query", this.indexOptions.search.defaultAnalyzer);
+			queryParser.setDateResolution(Resolution.SECOND);
+			Query searchQuery = queryParser.parse(expression);
+			
 			return searchQuery;
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block

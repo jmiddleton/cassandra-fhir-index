@@ -46,10 +46,9 @@ public class FhirTestDataTest {
 	@Test
 	public void loadTestData() throws Exception {
 		loadObservationData();
-		loadPatientData();
+		//loadPatientData();
 	}
 
-	@Test
 	public void loadObservationData() throws Exception {
 		IParser parser = ctx.newJsonParser();
 
@@ -57,7 +56,7 @@ public class FhirTestDataTest {
 				new File(this.getClass().getClassLoader().getResource("fhir/observation_example001.json").getPath()));
 		IBaseResource resource = parser.parseResource(fileReader);
 
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 1; i++) {
 
 			resource.getIdElement().setValue("obs_" + i);
 			((Observation) resource).getIdentifier().get(0).setValue("urn:uuid:187e0c12-8dd2-67e2-99b2-bf273c1111" + i);
@@ -75,7 +74,6 @@ public class FhirTestDataTest {
 		}
 	}
 
-	@Test
 	public void loadPatientData() throws Exception {
 		IParser parser = ctx.newJsonParser();
 		NameGenerator nameGenerator = new NameGenerator();

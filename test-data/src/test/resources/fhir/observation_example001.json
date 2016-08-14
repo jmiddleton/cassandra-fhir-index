@@ -22,7 +22,7 @@
     "coding": [
       {
         "system": "http://loinc.org",
-        "code": "55284-4",
+        "code": "12345-5",
         "display": "Blood pressure systolic & diastolic"
       }
     ]
@@ -30,7 +30,7 @@
   "subject": {
     "reference": "Patient/example"
   },
-  "effectiveDateTime": "2012-09-17",
+  "effectiveDateTime": "2015-05-14T18:05:19",
   "performer": [
     {
       "reference": "Practitioner/example"

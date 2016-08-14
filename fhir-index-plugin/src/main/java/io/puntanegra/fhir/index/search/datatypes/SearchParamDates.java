@@ -4,8 +4,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.lucene.document.DateTools;
+import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.LongField;
+import org.apache.lucene.document.StringField;
 
 public class SearchParamDates extends AbstractSearchParam {
 	private Date low;
@@ -51,15 +53,19 @@ public class SearchParamDates extends AbstractSearchParam {
 
 	@Override
 	public List<Field> createIndexedFields() {
-		Field fieldLow = new LongField(name, this.low.getTime(), Field.Store.NO);
+		Field fieldLow = new StringField(name, DateTools.dateToString(this.low, Resolution.SECOND), Field.Store.NO);
 
 		// TODO: ver como se busca por un periodo
 		Field fieldHigh = null;
 		if (this.high != null) {
-			fieldHigh = new LongField(name + "_high", this.high.getTime(), Field.Store.NO);
+			fieldHigh = new StringField(name + "_high", DateTools.dateToString(this.high, Resolution.SECOND), Field.Store.NO);
 		}
 
-		return Arrays.asList(fieldLow, fieldHigh);
+		if (fieldHigh == null) {
+			return Arrays.asList(fieldLow);
+		} else {
+			return Arrays.asList(fieldLow, fieldHigh);
+		}
 	}
 
 }

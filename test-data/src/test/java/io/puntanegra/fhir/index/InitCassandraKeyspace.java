@@ -2,6 +2,7 @@ package io.puntanegra.fhir.index;
 
 import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.commons.io.FileUtils;
+import org.junit.Test;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ProtocolVersion;
@@ -12,12 +13,13 @@ public class InitCassandraKeyspace {
 	private static final String RESOURCE_DATA = "/tmp/data";
 	protected Session session;
 
+	@Test
 	public void initCassandraFS() throws Exception {
 		FileUtils.forceDeleteOnExit(FileUtils.getFile(RESOURCE_DATA));
 		FileUtils.forceDeleteOnExit(FileUtils.getFile(RESOURCE_COMMITLOG));
 
 		System.setProperty("CASSANDRA_HOME", "~/Apps/apache-cassandra-3.0.4");
-		System.setProperty("cassandra.config", "cassandra.yaml");
+		System.setProperty("cassandra.config", "file:///Users/jmiddleton/Apps/apache-cassandra-3.0.4/conf/cassandra.yaml");
 		System.setProperty("storage-config", RESOURCE_DATA);
 
 		EmbeddedCassandraService cassandraService = new EmbeddedCassandraService();
@@ -52,7 +54,7 @@ public class InitCassandraKeyspace {
 				"    'search' : '{"+
 				"        resources : {"+
 				"            Patient : [\"family\", \"email\", \"active\"],"+
-				"            Observation : [\"code\", \"value-quantity\"]"+
+				"            Observation : [\"code\", \"date\"]"+
 				"        }"+
 				"    }'"+
 				"};");

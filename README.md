@@ -40,11 +40,14 @@ Cassandra FHIR Index provides the following search options:
 -  Regular Expression searches using forward slashes ``"/"``
 -  Fuzzy searches using ``"~"`` at the end of the expression
 -  Range searches between the lower and upper bound, i.e.: ``mod_date:[20020101 TO 20030101]``
+-  Date range is supported using date as String. The date format includes up to seconds, milliseconds are not supported
 -  Boolean searches operators ``(OR, AND, NOT, "+" and "-")``
 -  Top-k queries (relevance scoring, sort by value)
 -  Spark and Hadoop compatibility
 -  Paging over filters
 -  Token Range support
+
+For more details check Lucene's documentation: http://lucene.apache.org/core/3_5_0/queryparsersyntax.html
 
 ## Architecture
 
@@ -97,6 +100,16 @@ resources : {
 If `resources` is not defined, the index will process any resource found by HAPI-FHIR.
 
 During initialization the index will validate if the configuration is correct or not. In case of errors, the creation of the index will fail and an error message will be displayed.
+
+## Build and install
+
+Cassandra FHIR Index is distributed as a plugin for Apache Cassandra. Thus, you just need to build a JAR containing the plugin and add it to the Cassandra’s classpath:
+
+Clone this project
+Change to the downloaded directory: cd cassandra-fhir-index
+Build the plugin with Maven: mvn clean package
+Copy the generated JAR to the lib folder of your compatible Cassandra installation: cp target/fhir-index-plugin-*.jar $CASSANDRA_HOME/lib/
+Start/restart Cassandra.
 
 ## Quick start
 

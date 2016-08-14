@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -30,7 +30,7 @@ public class ResourceOptions {
 			@JsonProperty("resources") Map<String, Set<String>> resources)
 			throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		if (analyzer == null) {
-			this.defaultAnalyzer = new StandardAnalyzer();
+			this.defaultAnalyzer = new WhitespaceAnalyzer();
 		} else {
 			this.defaultAnalyzer = (Analyzer) Class.forName(analyzer).newInstance();
 		}
