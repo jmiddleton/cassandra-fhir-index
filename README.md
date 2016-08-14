@@ -105,11 +105,11 @@ During initialization the index will validate if the configuration is correct or
 
 Cassandra FHIR Index is distributed as a plugin for Apache Cassandra. Thus, you just need to build a JAR containing the plugin and add it to the Cassandra’s classpath:
 
-Clone this project
-Change to the downloaded directory: cd cassandra-fhir-index
-Build the plugin with Maven: mvn clean package
-Copy the generated JAR to the lib folder of your compatible Cassandra installation: cp target/fhir-index-plugin-*.jar $CASSANDRA_HOME/lib/
-Start/restart Cassandra.
+-  Clone this project
+-  Change to the downloaded directory: cd cassandra-fhir-index
+-  Build the plugin with Maven: mvn clean package
+-  Copy the generated JAR to the lib folder of your compatible Cassandra installation: cp target/fhir-index-plugin-*.jar $CASSANDRA_HOME/lib/
+-  Restart Cassandra.
 
 ## Quick start
 
