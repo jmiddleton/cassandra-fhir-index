@@ -101,14 +101,18 @@ If `resources` is not defined, the index will process any resource found by HAPI
 
 During initialization the index will validate if the configuration is correct or not. In case of errors, the creation of the index will fail and an error message will be displayed.
 
-## Build and install
+## Build and Installation
+First you will need the following tools:
+-  Cassandra 3.0.4
+-  Java >= 1.8
+-  Maven >= 3.0
 
 Cassandra FHIR Index is distributed as a plugin for Apache Cassandra. Thus, you just need to build a JAR containing the plugin and add it to the Cassandra’s classpath:
 
 -  Clone this project
--  Change to the downloaded directory: cd cassandra-fhir-index
--  Build the plugin with Maven: mvn clean package
--  Copy the generated JAR to the lib folder of your compatible Cassandra installation: cp target/fhir-index-plugin-*.jar $CASSANDRA_HOME/lib/
+-  Change to the downloaded directory: `cd cassandra-fhir-index`
+-  Build the plugin with Maven: `mvn clean package`
+-  Copy the generated JAR to the lib folder of your compatible Cassandra installation: `cp target/fhir-index-plugin-*.jar $CASSANDRA_HOME/lib/`
 -  Restart Cassandra.
 
 ## Quick start
@@ -206,19 +210,6 @@ For information about the different expression types, please refer to [Lucene's 
 TODO: describe custom keywords for ORDER BY and so on.
 
 TODO: describe different FHIR search parameter types: Number, Date, Reference, Token, etc.
-
-## Build and Installation
-
-To build and install, first you need the following tools:
-
--  Cassandra 3.0.4 or above
--  Java >= 1.8
--  Maven >= 3.0
-
-
-```
-mvn clean package
-```
 
 ### Create Docker image
 
