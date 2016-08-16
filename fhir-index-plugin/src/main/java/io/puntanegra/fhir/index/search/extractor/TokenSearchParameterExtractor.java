@@ -119,7 +119,7 @@ public class TokenSearchParameterExtractor extends AbstractSearchParameterExtrac
 					String useSystem = null;
 					if (instance instanceof ValueSet) {
 						ValueSet vs = (ValueSet) instance;
-						useSystem = vs.getCodeSystem().getSystem();
+						useSystem = ""; //TODO: review vs.getCodeSystem().getSystem();
 					}
 					systems.add(useSystem);
 				} else {

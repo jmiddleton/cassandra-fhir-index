@@ -31,7 +31,7 @@ import org.apache.cassandra.db.ColumnFamilyStore;
 import org.apache.cassandra.db.DecoratedKey;
 import org.apache.cassandra.db.PartitionColumns;
 import org.apache.cassandra.db.ReadCommand;
-import org.apache.cassandra.db.ReadOrderGroup;
+import org.apache.cassandra.db.ReadExecutionController;
 import org.apache.cassandra.db.SinglePartitionReadCommand;
 import org.apache.cassandra.db.filter.ClusteringIndexNamesFilter;
 import org.apache.cassandra.db.filter.ColumnFilter;
@@ -232,13 +232,15 @@ public class FhirIndexService {
 			Query query = entry.getQuery();
 			ScoreDoc after = entry.getScoreDoc();
 			SearchCacheUpdater cacheUpdater = entry.updater();
-			return (ReadOrderGroup orderGroup) -> read(query, sort, after, command, orderGroup, cacheUpdater);
+			return (ReadExecutionController readExecutionController) -> read(query, sort, after, command,
+					readExecutionController, cacheUpdater);
 		} else {
 			logger.debug("Search cache fails");
 			Query query = new CachingWrapperQuery(query(expression, command));
 			searchCache.put(expression, command, query);
 			SearchCacheUpdater cacheUpdater = searchCache.updater(expression, command, query);
-			return (ReadOrderGroup orderGroup) -> read(query, sort, null, command, orderGroup, cacheUpdater);
+			return (ReadExecutionController readExecutionController) -> read(query, sort, null, command,
+					readExecutionController, cacheUpdater);
 		}
 	}
 
@@ -414,17 +416,17 @@ public class FhirIndexService {
 	 *            the last Lucene doc
 	 * @param command
 	 *            the Cassandra command
-	 * @param orderGroup
-	 *            the Cassandra read order group
+	 * @param readExecutionController
+	 *            the Cassandra read order controller
 	 * @param cacheUpdater
 	 *            the search cache updater
 	 * @return the local {@link Row}s satisfying the search
 	 */
 	private UnfilteredPartitionIterator read(Query query, Sort sort, ScoreDoc after, ReadCommand command,
-			ReadOrderGroup orderGroup, SearchCacheUpdater cacheUpdater) {
+			ReadExecutionController readExecutionController, SearchCacheUpdater cacheUpdater) {
 		int limit = command.limits().count();
 		LuceneDocumentIterator documents = lucene.search(query, sort, after, limit, fieldsToLoad());
-		return new FhirIndexSearcher(this, command, table, orderGroup, documents, cacheUpdater);
+		return new FhirIndexSearcher(this, command, table, readExecutionController, documents, cacheUpdater);
 	}
 
 	private Set<String> fieldsToLoad() {
@@ -459,7 +461,7 @@ public class FhirIndexService {
 			QueryParser queryParser = new QueryParser("query", this.indexOptions.search.defaultAnalyzer);
 			queryParser.setDateResolution(Resolution.SECOND);
 			Query searchQuery = queryParser.parse(expression);
-			
+
 			return searchQuery;
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block

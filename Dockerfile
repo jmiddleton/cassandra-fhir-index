@@ -1,5 +1,5 @@
 # vim:set ft=dockerfile:
-FROM cassandra:3.0.4
+FROM cassandra:3.7
 
 ARG VERSION
 

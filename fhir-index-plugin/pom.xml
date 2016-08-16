@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>io.puntanegra.fhir.cassandra</groupId>
 		<artifactId>cassandra-fhir-index</artifactId>
-		<version>0.0.1</version>
+		<version>0.1.1</version>
 	</parent>
 
 	<artifactId>fhir-index-plugin</artifactId>
@@ -13,8 +13,8 @@
 	<description>Cassandra custom implementation to indexes FHIR Resources</description>
 
 	<properties>
-		<cassandra.version>3.0.4</cassandra.version>
-		<cassandra.driver.version>3.0.0</cassandra.driver.version>
+		<cassandra.version>3.7</cassandra.version>
+		<cassandra.driver.version>3.1.0</cassandra.driver.version>
 		<lucene.version>5.3.0</lucene.version>
 	</properties>
 

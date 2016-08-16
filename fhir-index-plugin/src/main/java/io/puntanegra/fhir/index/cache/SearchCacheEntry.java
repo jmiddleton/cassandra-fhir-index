@@ -62,7 +62,7 @@ public class SearchCacheEntry {
 		startPrefix = KeyMapper.startClusteringPrefix(command.dataRange());
 		stopPrefix = KeyMapper.stopClusteringPrefix(command.dataRange());
 		currentPosition = startPosition;
-		currentClustering = startPrefix.isPresent() ? Optional.of(new Clustering(startPrefix.get().getRawValues()))
+		currentClustering = startPrefix.isPresent() ? Optional.of(Clustering.make(startPrefix.get().getRawValues()))
 				: Optional.empty();
 		scoreDoc = null;
 	}
@@ -114,7 +114,7 @@ public class SearchCacheEntry {
 
 		// Discard clustering
 		if (start.isPresent()
-				&& comparator.compare(new Clustering(start.get().getRawValues()), currentClustering.get()) != 0) {
+				&& comparator.compare(Clustering.make(start.get().getRawValues()), currentClustering.get()) != 0) {
 			return false;
 		}
 

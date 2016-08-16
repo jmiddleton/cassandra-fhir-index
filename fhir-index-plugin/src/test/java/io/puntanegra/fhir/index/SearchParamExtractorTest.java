@@ -57,8 +57,8 @@ public class SearchParamExtractorTest {
 
 			if (SearchParamTypes.TOKEN == type) {
 				SearchParamToken token = (SearchParamToken) entry;
-				if (ename.equals("code") && "http://loinc.org".equals(token.getSystem())) {
-					assertEquals("12345-5", token.getCode());
+				if (ename.equals("code") && "8480-6".equals(token.getCode())) {
+					assertEquals("Observation.code | Observation.component.code", token.getPath());
 				}
 			}if (SearchParamTypes.DATE == type) {
 				SearchParamDates dates = (SearchParamDates) entry;

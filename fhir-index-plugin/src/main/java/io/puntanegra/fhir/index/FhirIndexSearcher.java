@@ -26,13 +26,14 @@ import org.apache.cassandra.db.ClusteringComparator;
 import org.apache.cassandra.db.ColumnFamilyStore;
 import org.apache.cassandra.db.DecoratedKey;
 import org.apache.cassandra.db.ReadCommand;
-import org.apache.cassandra.db.ReadOrderGroup;
+import org.apache.cassandra.db.ReadExecutionController;
 import org.apache.cassandra.db.SinglePartitionReadCommand;
 import org.apache.cassandra.db.filter.ClusteringIndexFilter;
 import org.apache.cassandra.db.filter.ClusteringIndexNamesFilter;
 import org.apache.cassandra.db.partitions.UnfilteredPartitionIterator;
 import org.apache.cassandra.db.rows.UnfilteredRowIterator;
 import org.apache.cassandra.utils.Pair;
+import org.apache.cassandra.utils.concurrent.OpOrder;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.ScoreDoc;
 
@@ -50,7 +51,7 @@ public class FhirIndexSearcher implements UnfilteredPartitionIterator {
 
 	private final ReadCommand command;
 	private final ColumnFamilyStore table;
-	private final ReadOrderGroup orderGroup;
+	private final OpOrder.Group orderGroup;
 	private final LuceneDocumentIterator documents;
 	private UnfilteredRowIterator next;
 
@@ -77,11 +78,12 @@ public class FhirIndexSearcher implements UnfilteredPartitionIterator {
 	 *            the search cache updater
 	 */
 	public FhirIndexSearcher(FhirIndexService service, ReadCommand command, ColumnFamilyStore table,
-			ReadOrderGroup orderGroup, LuceneDocumentIterator documents, SearchCacheUpdater cacheUpdater) {
+			ReadExecutionController readExecutionController, LuceneDocumentIterator documents,
+			SearchCacheUpdater cacheUpdater) {
 
 		this.command = command;
 		this.table = table;
-		this.orderGroup = orderGroup;
+		this.orderGroup = readExecutionController.baseReadOpOrderGroup();
 		this.documents = documents;
 
 		this.service = service;
@@ -160,7 +162,7 @@ public class FhirIndexSearcher implements UnfilteredPartitionIterator {
 	public UnfilteredRowIterator read(DecoratedKey key, ClusteringIndexFilter filter) {
 		return SinglePartitionReadCommand.create(isForThrift(), table.metadata, command.nowInSec(),
 				command.columnFilter(), command.rowFilter(), command.limits(), key, filter)
-				.queryMemtableAndDisk(table, orderGroup.baseReadOpOrderGroup());
+				.queryMemtableAndDisk(table, orderGroup);
 	}
 
 	private NavigableSet<Clustering> clusterings(DecoratedKey key) {

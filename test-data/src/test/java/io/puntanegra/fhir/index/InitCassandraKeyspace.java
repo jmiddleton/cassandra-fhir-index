@@ -9,8 +9,8 @@ import com.datastax.driver.core.ProtocolVersion;
 import com.datastax.driver.core.Session;
 
 public class InitCassandraKeyspace {
-	private static final String RESOURCE_COMMITLOG = "/tmp/commitlog";
-	private static final String RESOURCE_DATA = "/tmp/data";
+	private static final String RESOURCE_COMMITLOG = "/tmp/cassandra3.7/commitlog";
+	private static final String RESOURCE_DATA = "/tmp/cassandra3.7/data";
 	protected Session session;
 
 	@Test
@@ -18,8 +18,8 @@ public class InitCassandraKeyspace {
 		FileUtils.forceDeleteOnExit(FileUtils.getFile(RESOURCE_DATA));
 		FileUtils.forceDeleteOnExit(FileUtils.getFile(RESOURCE_COMMITLOG));
 
-		System.setProperty("CASSANDRA_HOME", "~/Apps/apache-cassandra-3.0.4");
-		System.setProperty("cassandra.config", "file:///Users/jmiddleton/Apps/apache-cassandra-3.0.4/conf/cassandra.yaml");
+		System.setProperty("CASSANDRA_HOME", "~/Apps/cassandra-3.7");
+		System.setProperty("cassandra.config", "file:///Users/jmiddleton/Apps/cassandra-3.7/conf/cassandra.yaml");
 		System.setProperty("storage-config", RESOURCE_DATA);
 
 		EmbeddedCassandraService cassandraService = new EmbeddedCassandraService();
