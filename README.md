@@ -118,13 +118,13 @@ The example uses a Docker container with a preconfigured Cassandra to support th
 To start a single Cassandra node execute:
 
 ```
-$ docker run -p 9042:9042 --name cassandra-node01 -d jmiddleton/cassandra_fhir:3.0.4
+$ docker run -p 9042:9042 --name cassandra-node01 -d jmiddleton/cassandra_fhir:3.7
 ```
 
 To connect to Cassandra from `cqlsh`, start another container as follows:
 
 ```
-$ docker run -it --link cassandra-node01:cassandra --rm jmiddleton/cassandra_fhir:3.0.4 cqlsh cassandra
+$ docker run -it --link cassandra-node01:cassandra --rm jmiddleton/cassandra_fhir:3.7 cqlsh cassandra
 ```
 
 The example walks through creating a table and index for a JSON column. Then shows how to performs queries on some inserted data.
@@ -211,7 +211,7 @@ TODO: describe different FHIR search parameter types: Number, Date, Reference, T
 
 To build and install, first you need the following tools:
 
--  Cassandra 3.0.4 or above
+-  Cassandra 3.7 or above
 -  Java >= 1.8
 -  Maven >= 3.0
 
@@ -225,13 +225,6 @@ mvn clean package
 To create a Docker image execute the following commands:
 
 ```
-docker build --build-arg VERSION=0.0.1 -t jmiddleton/cassandra_fhir:3.0.4 .
+docker build --build-arg VERSION=0.0.1 -t jmiddleton/cassandra_fhir:3.7 .
 ```
 TODO....
-
-
-
-
-
-
-

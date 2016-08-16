@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.puntanegra.fhir.cassandra</groupId>
 	<artifactId>cassandra-fhir-index-test-data</artifactId>
-	<version>0.1.1</version>
+	<version>0.2.0</version>
 	<name>Cassandra FHIR Index Test Data</name>
 
 	<licenses>
@@ -30,7 +30,7 @@
 		<cassandra.driver.version>3.1.0</cassandra.driver.version>
 		<lucene.version>5.3.0</lucene.version>
 		<commons-beanutils.version>1.9.2</commons-beanutils.version>
-		<hapi.version>1.5</hapi.version>
+		<hapi.version>1.6</hapi.version>
 		<junit.version>4.12</junit.version>
 		<skipTests>false</skipTests>
 		<skipITs>false</skipITs>
