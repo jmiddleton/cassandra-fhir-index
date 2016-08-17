@@ -1,17 +1,18 @@
 package io.puntanegra.fhir.index.search.datatypes;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.lucene.document.DateTools;
-import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 
 public class SearchParamDates extends AbstractSearchParam {
 	private Date low;
 	private Date high;
+
+	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 
 	public SearchParamDates(String name, String path, SearchParamTypes type, Date low, Date high) {
 		super(name, path, type);
@@ -53,12 +54,12 @@ public class SearchParamDates extends AbstractSearchParam {
 
 	@Override
 	public List<Field> createIndexedFields() {
-		Field fieldLow = new StringField(name, DateTools.dateToString(this.low, Resolution.SECOND), Field.Store.NO);
+		Field fieldLow = new StringField(name, dateFormat.format(this.low), Field.Store.NO);
 
 		// TODO: ver como se busca por un periodo
 		Field fieldHigh = null;
 		if (this.high != null) {
-			fieldHigh = new StringField(name + "_high", DateTools.dateToString(this.high, Resolution.SECOND), Field.Store.NO);
+			fieldHigh = new StringField(name + "_high", dateFormat.format(this.high), Field.Store.NO);
 		}
 
 		if (fieldHigh == null) {

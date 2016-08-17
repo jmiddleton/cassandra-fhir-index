@@ -22,7 +22,7 @@
     "coding": [
       {
         "system": "http://loinc.org",
-        "code": "12345-5",
+        "code": "2112345-51",
         "display": "Blood pressure systolic & diastolic"
       }
     ]
@@ -30,7 +30,7 @@
   "subject": {
     "reference": "Patient/example"
   },
-  "effectiveDateTime": "2015-05-14T18:05:19",
+  "effectiveDateTime": "2016-08-17T07:14:35+10:00",
   "performer": [
     {
       "reference": "Practitioner/example"
@@ -38,7 +38,7 @@
   ],
   "interpretation": {
     "fhir_comments": [
-      "   an interpretation offered to the combination observation\n        generally, it would only be appropriate to offer an interpretation\n        of an observation that has no value if it has \"COMP\" (component)\n        observations   "
+      "   an interpretation offered to the combination observation\n generally, it would only be appropriate to offer an interpretation\n        of an observation that has no value if it has \"COMP\" (component)\n        observations   "
     ],
     "coding": [
       {
