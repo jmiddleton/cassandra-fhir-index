@@ -47,6 +47,7 @@ public class InitCassandraKeyspace {
 		    "content text,"+
 		    "PRIMARY KEY (resource_id, version, lastupdated));");
 		
+		//session.execute("DROP INDEX idx_fhir_resources");
 		session.execute("CREATE CUSTOM INDEX IF NOT EXISTS idx_fhir_resources ON test.FHIR_RESOURCES (content)"+
 				"USING 'io.puntanegra.fhir.index.FhirIndex'"+
 				"WITH OPTIONS = {"+
@@ -54,7 +55,7 @@ public class InitCassandraKeyspace {
 				"    'search' : '{"+
 				"        resources : {"+
 				"            Patient : [\"family\", \"email\", \"active\"],"+
-				"            Observation : [\"code\", \"date\"]"+
+				"            Observation : [\"subject\", \"date\"]"+
 				"        }"+
 				"    }'"+
 				"};");

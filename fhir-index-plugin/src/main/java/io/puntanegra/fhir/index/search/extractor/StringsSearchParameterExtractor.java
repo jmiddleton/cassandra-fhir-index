@@ -41,8 +41,8 @@ public class StringsSearchParameterExtractor extends AbstractSearchParameterExtr
 		String resourceName = searchParam.getName();
 		String paramType = getParamType(searchParam);
 
-		for (Object nextObject : extractValues(path, instance)) {
-			if (nextObject == null || ((IBase) nextObject).isEmpty()) {
+		for (Object obj : extractValues(path, instance)) {
+			if (obj == null || ((IBase) obj).isEmpty()) {
 				continue;
 			}
 
@@ -53,8 +53,8 @@ public class StringsSearchParameterExtractor extends AbstractSearchParameterExtr
 
 			// TODO: check if it is better to return the original value instead
 			// of the String representation
-			if (nextObject instanceof IPrimitiveType<?>) {
-				IPrimitiveType<?> primitive = (IPrimitiveType<?>) nextObject;
+			if (obj instanceof IPrimitiveType<?>) {
+				IPrimitiveType<?> primitive = (IPrimitiveType<?>) obj;
 				String searchTerm = primitive.getValueAsString();
 
 				AbstractSearchParam def = null;
@@ -67,9 +67,9 @@ public class StringsSearchParameterExtractor extends AbstractSearchParameterExtr
 				values.add(def);
 
 			} else {
-				if (nextObject instanceof HumanName) {
+				if (obj instanceof HumanName) {
 					ArrayList<String> allNames = new ArrayList<String>();
-					HumanName nextHumanName = (HumanName) nextObject;
+					HumanName nextHumanName = (HumanName) obj;
 					allNames.add(nextHumanName.getFamilyAsSingleString());
 					allNames.add(nextHumanName.getGivenAsSingleString());
 
@@ -77,9 +77,9 @@ public class StringsSearchParameterExtractor extends AbstractSearchParameterExtr
 							SearchParamTypes.valueOf(paramType), StringUtils.join(allNames, ' '));
 					values.add(def);
 
-				} else if (nextObject instanceof Address) {
+				} else if (obj instanceof Address) {
 					ArrayList<String> allNames = new ArrayList<String>();
-					Address nextAddress = (Address) nextObject;
+					Address nextAddress = (Address) obj;
 					// TODO: allNames.addAll(nextAddress.getLine());
 					allNames.add(nextAddress.getCityElement().asStringValue());
 					allNames.add(nextAddress.getStateElement().asStringValue());
@@ -90,8 +90,8 @@ public class StringsSearchParameterExtractor extends AbstractSearchParameterExtr
 							SearchParamTypes.valueOf(paramType), StringUtils.join(allNames, ' '));
 					values.add(def);
 
-				} else if (nextObject instanceof ContactPoint) {
-					ContactPoint contact = (ContactPoint) nextObject;
+				} else if (obj instanceof ContactPoint) {
+					ContactPoint contact = (ContactPoint) obj;
 					if (contact.getValueElement().isEmpty() == false) {
 
 						SearchParamString def = new SearchParamString(resourceName, path,
@@ -100,8 +100,10 @@ public class StringsSearchParameterExtractor extends AbstractSearchParameterExtr
 					}
 				} else {
 					if (!multiType) {
-						//throw new SearchParameterException("Search param " + resourceName
-							//	+ " is of unexpected datatype: " + nextObject.getClass());
+						// throw new SearchParameterException("Search param " +
+						// resourceName
+						// + " is of unexpected datatype: " +
+						// obj.getClass());
 					}
 				}
 			}

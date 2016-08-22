@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -56,6 +57,11 @@ public class UriSearchParameterExtractor extends AbstractSearchParameterExtracto
 
 				SearchParamString def = new SearchParamString(resourceName, path, SearchParamTypes.valueOf(paramType),
 						uri.getValue());
+				values.add(def);
+			} else if (obj instanceof Reference) {
+				Reference ref = (Reference) obj;
+				SearchParamString def = new SearchParamString(resourceName, path, SearchParamTypes.valueOf(paramType),
+						ref.getReference());
 				values.add(def);
 			} else {
 				if (!multiType) {

@@ -23,7 +23,7 @@ public class SearchParameterExtractorFactory {
 	public SearchParamExtractor getParameterExtractor(SearchParamTypes type) {
 		if (SearchParamTypes.TOKEN == type) {
 			return new TokenSearchParameterExtractor(this.ctx);
-		} else if (SearchParamTypes.URI == type) {
+		} else if (SearchParamTypes.URI == type || SearchParamTypes.REFERENCE == type) {
 			return new UriSearchParameterExtractor(this.ctx);
 		} else if (SearchParamTypes.QUANTITY == type) {
 			return new QuantitySearchParameterExtractor(this.ctx);
